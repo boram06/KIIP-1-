@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>3과 짝활동 발음 연습 | 오늘 뭐 해요?</title>
+<style>
+:root{
+  --bg:#f5fafc; --card:#fff; --ink:#172c40; --muted:#6d8194;
+  --teal:#0a8a80; --teal2:#27b9aa; --mint:#dff7f1;
+  --yellow:#f5bf20; --yellowSoft:#fff3bd; --pink:#ef174b;
+  --line:#d8e5ea; --good:#08a45a; --goodSoft:#e9fff3;
+  --bad:#e54545; --badSoft:#fff0f0; --shadow:0 10px 30px rgba(35,68,83,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:linear-gradient(180deg,#fbfffe,#eef6fb);color:var(--ink);
+font-family:Pretendard,"Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}
+.app{max-width:860px;margin:auto;min-height:100vh;padding:16px 16px 44px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.back{font-weight:900;color:#0a6d65}.status{display:flex;gap:8px}
+.pill{background:#fff;border:1px solid #cde5e2;border-radius:18px;padding:9px 12px;font-size:13px;font-weight:900;box-shadow:0 4px 12px rgba(0,0,0,.04)}
+.hero{background:linear-gradient(135deg,#e4faf6,#fbffff);border:1px solid #d2ebe6;border-radius:28px;padding:22px;margin-bottom:16px}
+.eyebrow{display:inline-block;background:#c7f4eb;color:#08746b;border-radius:999px;padding:7px 11px;font-size:13px;font-weight:900}
+h1{font-size:30px;line-height:1.25;margin:9px 0 7px}.hero p{margin:0;color:#607486;font-weight:700;line-height:1.5}
+.progress{display:flex;align-items:center;gap:12px;margin-top:17px}.bar{height:10px;flex:1;background:#dce8ec;border-radius:999px;overflow:hidden}
+.bar>div{height:100%;width:20%;background:linear-gradient(90deg,var(--teal),#31d0be)}
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.person{background:#fff;border:2px solid transparent;border-radius:26px;padding:18px;box-shadow:var(--shadow);transition:.2s}
+.person.active{border-color:var(--yellow);box-shadow:0 0 0 5px rgba(245,191,32,.15),var(--shadow)}
+.person.dim{opacity:.55}.head{display:flex;align-items:center;gap:12px}.avatar{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:#eef7f5;font-size:28px}
+.person h3{margin:0;font-size:20px}.role{font-size:12px;color:var(--muted);font-weight:900;margin-top:3px}
+.task{margin-top:14px;border-radius:17px;padding:14px 15px;background:var(--yellowSoft);font-size:15px;font-weight:900;line-height:1.5}
+.task.listen{background:#f1f5f8;color:#677a89}
+.card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.turntag{display:inline-block;background:#fff0b0;color:#805d00;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:900}
+.read-title{font-size:15px;color:#63788a;font-weight:900;margin:14px 0 6px}
+.target{font-size:28px;font-weight:1000;line-height:1.5;margin:0 0 14px;letter-spacing:-.4px}
+.syllable-panel{border:1px solid #d5e0ff;background:#fbfcff;border-radius:22px;padding:14px;margin-top:12px}
+.syllable-title{font-size:13px;color:#667a8c;font-weight:900;margin-bottom:10px}
+.syllables{display:flex;flex-wrap:wrap;gap:8px}
+.syl{min-width:44px;padding:8px 8px 9px;border-radius:14px;border:2px solid #cdd8e0;background:#fff;text-align:center}
+.syl .mark{font-size:14px;line-height:1;font-weight:1000;color:#788b98;margin-bottom:3px}
+.syl .char{font-size:22px;font-weight:1000;line-height:1.1}
+.syl.ok{border-color:#74e1aa;background:var(--goodSoft);box-shadow:0 3px 0 #bcefd2}
+.syl.ok .mark{color:var(--good)}
+.syl.bad{border-color:#f09a9a;background:var(--badSoft);box-shadow:0 3px 0 #f5cccc}
+.syl.bad .mark{color:var(--bad)}
+.word-gap{width:12px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.btn{border:0;border-radius:18px;padding:15px 13px;font-size:16px;font-weight:900;cursor:pointer}
+.primary{background:var(--pink);color:#fff}.secondary{background:var(--mint);color:#0a766e}.ghost{background:#fff;border:1px solid #d6e1e6;color:#40566a}
+.teal{background:var(--teal);color:#fff}.full{grid-column:1/-1}
+.rec{display:none;margin-top:14px;background:#fff4f7;border:1px solid #ffd2dc;border-radius:18px;padding:14px}.rec.show{display:block}
+.live{font-weight:900;color:#c51948;margin-bottom:6px}.transcript{font-size:18px;font-weight:800;line-height:1.5;min-height:28px}
+.manual{display:none;margin-top:12px;gap:8px}.manual.show{display:flex}.manual input{flex:1;border:1px solid #cad8df;border-radius:14px;padding:12px 13px}
+.feedback{display:none;margin-top:16px;border-radius:20px;padding:16px}.feedback.show{display:block}
+.feedback.good{background:#effbf4;border:1px solid #c7ecd7}.feedback.mid{background:#fff8e7;border:1px solid #efdca4}.feedback.bad{background:#fff0f0;border:1px solid #efc9c9}
+.score{font-size:30px;font-weight:1000}.msg{font-weight:800;line-height:1.5;margin-top:6px}
+.next{display:none;margin-top:14px;grid-template-columns:1fr 1fr;gap:10px}.next.show{display:grid}
+.dialogue{background:#fff;border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);overflow:hidden}
+.dialogue-head{padding:17px 18px;border-bottom:1px solid #e4edf0;display:flex;justify-content:space-between;font-weight:900}
+.chat{background:#bfd2e1;padding:18px;min-height:180px;display:flex;flex-direction:column;gap:12px}
+.wrap{max-width:88%}.wrap.r{align-self:flex-end}.wrap.l{align-self:flex-start}.speaker{font-size:12px;font-weight:900;color:#5d7180;margin:0 7px 4px}
+.bubble{padding:12px 15px;border-radius:18px;background:#eef3f8;font-weight:800;line-height:1.45}.r .bubble{background:#e5df69}
+.meta{font-size:11px;color:#5e7280;margin-top:4px;padding:0 7px}
+.finish{display:none;text-align:center;background:#fff;border:1px solid var(--line);border-radius:28px;padding:28px;box-shadow:var(--shadow)}
+.finish.show{display:block}.finish .emoji{font-size:52px}.finish h2{font-size:28px;margin:8px}.avg{font-size:42px;font-weight:1000;color:#5142dc}
+.note{font-size:12px;color:#7d909d;text-align:center;margin-top:15px;line-height:1.5}
+@media(max-width:640px){.stage{grid-template-columns:1fr}.target{font-size:24px}.controls{grid-template-columns:1fr}.full{grid-column:auto}.next{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <a class="back" href="index.html" style="text-decoration:none">← 단원 선택</a>
+    <div class="status">
+      <div class="pill">진행 <span id="topProgress">1/5</span></div>
+      <div class="pill">평균 <span id="avgTop">—</span></div>
+    </div>
+  </div>
+
+  <section class="hero">
+    <span class="eyebrow">3과 · 오늘 뭐 해요?</span>
+    <h1>문장을 보고 정확하게 말해요</h1>
+    <p>제이슨과 후엔이 되어 오늘 무엇을 하는지 이야기해 보세요.</p>
+    <div class="progress"><b id="progressText">1 / 4</b><div class="bar"><div id="barFill"></div></div></div>
+  </section>
+
+  <div id="mainArea">
+    <section class="stage">
+      <article id="cardA" class="person">
+        <div class="head"><div class="avatar">👩🏻</div><div><h3>제이슨</h3><div class="role">A 역할</div></div></div>
+        <div id="taskA" class="task"></div>
+      </article>
+      <article id="cardB" class="person">
+        <div class="head"><div class="avatar">👩🏽</div><div><h3>후엔</h3><div class="role">B 역할</div></div></div>
+        <div id="taskB" class="task listen"></div>
+      </article>
+    </section>
+
+    <section class="card">
+      <span class="turntag" id="turnTag">라흐만 차례</span>
+
+      <div class="read-title">학생 말하기</div>
+      <div class="target" id="targetText"></div>
+
+      <div class="syllable-panel">
+        <div class="syllable-title">음절별 확인</div>
+        <div class="syllables" id="syllables"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn secondary" onclick="speakModel()">🔊 모범 문장 듣기</button>
+        <button class="btn primary" id="recordBtn" onclick="startRecognition()">🎤 말하기 시작</button>
+        <button class="btn ghost full" onclick="toggleManual()">⌨️ 직접 입력</button>
+      </div>
+
+      <div id="recBox" class="rec">
+        <div id="liveText" class="live">● 듣고 있어요…</div>
+        <div id="transcript" class="transcript">말하면 인식 결과가 표시돼요.</div>
+      </div>
+
+      <div id="manualBox" class="manual">
+        <input id="manualInput" placeholder="말한 문장을 직접 입력하세요">
+        <button class="btn teal" onclick="scoreManual()">확인</button>
+      </div>
+
+      <div id="feedback" class="feedback">
+        <div id="scoreText" class="score"></div>
+        <div id="msg" class="msg"></div>
+      </div>
+
+      <div id="nextBar" class="next">
+        <button class="btn secondary" onclick="retry()">다시 말하기</button>
+        <button class="btn teal" onclick="nextTurn()">다음 차례 →</button>
+      </div>
+    </section>
+
+    <section class="dialogue">
+      <div class="dialogue-head"><span>오늘 뭐 해요? 대화방</span><span id="chatCount">0 / 4</span></div>
+      <div id="chat" class="chat"></div>
+    </section>
+  </div>
+
+  <section id="finish" class="finish">
+    <div class="emoji">🎉</div>
+    <h2>3과 짝활동 완료!</h2>
+    <div class="avg"><span id="finalAvg">100</span>점</div>
+    <p>문장을 모두 연습했어요.</p>
+    <div class="controls">
+      <button class="btn secondary" onclick="restart()">처음부터 다시 하기</button>
+      <button class="btn teal" onclick="showReview()">대화 기록 보기</button>
+    </div>
+  </section>
+
+  <div class="note">
+    ※ 이 버전의 음절 평가는 브라우저가 음성을 글자로 인식한 결과와 목표 문장을 비교하는 방식입니다.
+    실제 음향·조음 수준의 발음 평가와는 다르며, 주변 소음과 기기에 따라 결과가 달라질 수 있습니다.
+  </div>
+</div>
+
+<script>
+const turns=[
+ {speaker:"A",name:"제이슨",target:"후엔 씨, 오늘 뭐 해요?"},
+ {speaker:"B",name:"후엔",target:"친구를 만나요. 제이슨 씨는 뭐 해요?"},
+ {speaker:"A",name:"제이슨",target:"저는 한국 영화를 봐요."},
+ {speaker:"A",name:"제이슨",target:"한국 영화가 재미있어요."}
+];
+
+let idx=0, scores=[], records=[], recognition=null, recognizing=false;
+let pending=null;
+
+function cleanText(s){
+  return (s||"").replace(/[.,!?~…·'"“”‘’]/g,"").replace(/\s+/g," ").trim();
+}
+function charsOnly(s){ return [...cleanText(s).replace(/\s/g,"")]; }
+
+function levenshteinArray(a,b){
+  const dp=Array.from({length:a.length+1},()=>Array(b.length+1).fill(0));
+  for(let i=0;i<=a.length;i++)dp[i][0]=i;
+  for(let j=0;j<=b.length;j++)dp[0][j]=j;
+  for(let i=1;i<=a.length;i++){
+    for(let j=1;j<=b.length;j++){
+      dp[i][j]=Math.min(
+        dp[i-1][j]+1,
+        dp[i][j-1]+1,
+        dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1)
+      );
+    }
+  }
+  return dp;
+}
+
+function alignChars(target, spoken){
+  const a=charsOnly(target), b=charsOnly(spoken);
+  const dp=levenshteinArray(a,b);
+  let i=a.length,j=b.length;
+  const aligned=[];
+  while(i>0 || j>0){
+    if(i>0 && j>0 && dp[i][j]===dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1)){
+      aligned.push({t:a[i-1], s:b[j-1], ok:a[i-1]===b[j-1]}); i--; j--;
+    }else if(i>0 && dp[i][j]===dp[i-1][j]+1){
+      aligned.push({t:a[i-1], s:"", ok:false}); i--;
+    }else{
+      j--;
+    }
+  }
+  return aligned.reverse();
+}
+
+function scoreFromAlignment(aligned){
+  if(!aligned.length)return 0;
+  const ok=aligned.filter(x=>x.ok).length;
+  return Math.round(ok/aligned.length*100);
+}
+
+function buildSyllableBoxes(target, results=null){
+  const box=document.getElementById("syllables");
+  box.innerHTML="";
+  const clean=cleanText(target);
+  let resultIndex=0;
+  for(const ch of clean){
+    if(ch===" "){
+      const gap=document.createElement("div"); gap.className="word-gap"; box.appendChild(gap);
+      continue;
+    }
+    const item=document.createElement("div");
+    item.className="syl";
+    let mark="·";
+    if(results){
+      const r=results[resultIndex++];
+      item.classList.add(r && r.ok ? "ok":"bad");
+      mark=r && r.ok ? "O":"X";
+    }
+    item.innerHTML=`<div class="mark">${mark}</div><div class="char">${ch}</div>`;
+    box.appendChild(item);
+  }
+}
+
+function render(){
+  const t=turns[idx];
+  document.getElementById("topProgress").textContent=`${idx+1}/${turns.length}`;
+  document.getElementById("progressText").textContent=`${idx+1} / ${turns.length}`;
+  document.getElementById("barFill").style.width=`${((idx+1)/turns.length)*100}%`;
+  document.getElementById("turnTag").textContent=`${t.name} 차례`;
+  document.getElementById("targetText").textContent=t.target;
+  document.getElementById("cardA").className="person "+(t.speaker==="A"?"active":"dim");
+  document.getElementById("cardB").className="person "+(t.speaker==="B"?"active":"dim");
+  document.getElementById("taskA").className="task "+(t.speaker==="A"?"":"listen");
+  document.getElementById("taskB").className="task "+(t.speaker==="B"?"":"listen");
+  document.getElementById("taskA").textContent=t.speaker==="A" ? `${t.name} 말하기 시작`:"상대의 차례를 기다리세요.";
+  document.getElementById("taskB").textContent=t.speaker==="B" ? `${t.name} 말하기 시작`:"상대의 차례를 기다리세요.";
+  buildSyllableBoxes(t.target);
+  document.getElementById("recBox").classList.remove("show");
+  document.getElementById("manualBox").classList.remove("show");
+  document.getElementById("feedback").className="feedback";
+  document.getElementById("nextBar").classList.remove("show");
+  document.getElementById("recordBtn").textContent="🎤 말하기 시작";
+  document.getElementById("manualInput").value="";
+  pending=null;
+  updateAvg();
+}
+
+function speakModel(){
+  if(!("speechSynthesis" in window)){alert("이 브라우저에서는 음성 재생을 지원하지 않습니다.");return;}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(turns[idx].target);
+  u.lang="ko-KR";u.rate=.82;
+  speechSynthesis.speak(u);
+}
+
+function toggleManual(){ document.getElementById("manualBox").classList.toggle("show"); }
+
+function startRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    alert("이 브라우저에서는 음성 인식이 지원되지 않습니다. Chrome/Edge의 HTTPS 환경에서 사용하거나 직접 입력을 이용해 주세요.");
+    return;
+  }
+  if(recognizing){try{recognition.stop()}catch(e){}return;}
+  recognition=new SR();
+  recognition.lang="ko-KR"; recognition.interimResults=true; recognition.continuous=false; recognition.maxAlternatives=3;
+  recognizing=true;
+  document.getElementById("recBox").classList.add("show");
+  document.getElementById("liveText").textContent="● 듣고 있어요…";
+  document.getElementById("transcript").textContent="문장을 읽어 주세요.";
+  document.getElementById("recordBtn").textContent="■ 듣기 중지";
+  let finalText="";
+  recognition.onresult=e=>{
+    let interim="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const txt=e.results[i][0].transcript;
+      if(e.results[i].isFinal) finalText+=txt; else interim+=txt;
+    }
+    document.getElementById("transcript").textContent=finalText||interim||"문장을 읽어 주세요.";
+  };
+  recognition.onerror=e=>{
+    recognizing=false;
+    document.getElementById("liveText").textContent="음성을 인식하지 못했어요.";
+    document.getElementById("recordBtn").textContent="🎤 다시 말하기";
+  };
+  recognition.onend=()=>{
+    recognizing=false;
+    document.getElementById("recordBtn").textContent="🎤 말하기 시작";
+    const txt=document.getElementById("transcript").textContent;
+    if(txt && txt!=="문장을 읽어 주세요.") scoreUtterance(txt);
+  };
+  recognition.start();
+}
+
+function scoreManual(){
+  const txt=document.getElementById("manualInput").value.trim();
+  if(!txt){alert("문장을 입력해 주세요.");return;}
+  document.getElementById("recBox").classList.add("show");
+  document.getElementById("liveText").textContent="직접 입력한 문장";
+  document.getElementById("transcript").textContent=txt;
+  scoreUtterance(txt);
+}
+
+function scoreUtterance(spoken){
+  const target=turns[idx].target;
+  const aligned=alignChars(target,spoken);
+  const score=scoreFromAlignment(aligned);
+  buildSyllableBoxes(target,aligned);
+
+  const fb=document.getElementById("feedback");
+  fb.className="feedback show "+(score>=90?"good":score>=70?"mid":"bad");
+  document.getElementById("scoreText").textContent=`${score}점`;
+
+  const wrong=aligned.filter(x=>!x.ok).map(x=>x.t).join(" ");
+  let msg="";
+  if(score>=95) msg="아주 좋아요! 모든 음절이 거의 정확하게 인식됐어요.";
+  else if(score>=80) msg=`잘했어요. ${wrong ? "X 표시된 음절을 조금 더 또박또박 말해 보세요.":""}`;
+  else msg="모범 문장을 한 번 듣고, X 표시된 음절을 천천히 다시 읽어 보세요.";
+  document.getElementById("msg").textContent=msg;
+  document.getElementById("nextBar").classList.add("show");
+  pending={spoken,score,aligned};
+}
+
+function retry(){
+  buildSyllableBoxes(turns[idx].target);
+  document.getElementById("feedback").className="feedback";
+  document.getElementById("nextBar").classList.remove("show");
+  document.getElementById("recBox").classList.remove("show");
+  pending=null;
+}
+
+function nextTurn(){
+  if(!pending)return;
+  scores.push(pending.score);
+  records.push({...turns[idx],spoken:pending.spoken,score:pending.score});
+  addChat(records[records.length-1]);
+  if(idx===turns.length-1){finishActivity();return;}
+  idx++; render();
+  document.getElementById("chatCount").textContent=`${records.length} / ${turns.length}`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function addChat(r){
+  const chat=document.getElementById("chat");
+  const w=document.createElement("div");
+  w.className="wrap "+(r.speaker==="B"?"r":"l");
+  w.innerHTML=`<div class="speaker">${r.name}</div><div class="bubble">${esc(r.spoken)}</div><div class="meta">${r.score}점</div>`;
+  chat.appendChild(w);
+}
+function esc(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function updateAvg(){document.getElementById("avgTop").textContent=scores.length?`${Math.round(scores.reduce((a,b)=>a+b,0)/scores.length)}점`:"—";}
+function finishActivity(){
+  const avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+  document.getElementById("mainArea").style.display="none";
+  document.getElementById("finish").classList.add("show");
+  document.getElementById("finalAvg").textContent=avg;
+  document.getElementById("topProgress").textContent="4/4";
+  document.getElementById("avgTop").textContent=`${avg}점`;
+  localStorage.setItem("pairPronunciationRecord",JSON.stringify({date:new Date().toISOString(),avg,records}));
+}
+function restart(){
+  idx=0;scores=[];records=[];pending=null;
+  document.getElementById("chat").innerHTML="";
+  document.getElementById("chatCount").textContent="0 / 4";
+  document.getElementById("mainArea").style.display="block";
+  document.getElementById("finish").classList.remove("show");
+  render();
+}
+function showReview(){
+  document.getElementById("mainArea").style.display="block";
+  document.getElementById("finish").classList.remove("show");
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+}
+render();
+</script>
+</body>
+</html>
