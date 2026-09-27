@@ -4,14 +4,31 @@
 <div class="people"><div id="pa" class="person"><b>제이슨</b><div id="ta" class="task"></div></div><div id="pb" class="person"><b>이링</b><div id="tb" class="task"></div></div></div>
 <section class="box"><span class="tag" id="turn"></span><div id="target"></div><div class="syllables" id="syllables"></div>
 <div class="buttons"><button class="listen" onclick="model()">🔊 모범 문장 듣기</button><button class="speak" onclick="recognize()">🎤 말하기 시작</button><button class="manual" onclick="manual()">⌨️ 직접 입력</button></div>
-<div id="inputrow"><input id="inp" placeholder="말한 문장을 입력하세요"><button class="listen" onclick="check(inp.value)">확인</button></div><div id="result"></div><button id="next" onclick="next()">다음 차례 →</button></section></div>
+<div id="inputrow"><input id="inp" placeholder="말한 문장을 입력하세요"><button class="listen" onclick="check(el.inp.value)">확인</button></div><div id="result"></div><button id="nextBtn" onclick="nextTurn()">다음 차례 →</button></section></div>
 <script>const turns=[{"speaker": "A", "name": "제이슨", "target": "이링 씨, 생일이 몇 월 며칠이에요?"}, {"speaker": "B", "name": "이링", "target": "5월 16일이에요."}, {"speaker": "A", "name": "제이슨", "target": "그날이 금요일이에요?"}, {"speaker": "B", "name": "이링", "target": "아니요, 금요일이 아니에요. 토요일이에요."}, {"speaker": "B", "name": "이링", "target": "제 생일에 같이 밥 먹어요."}];let n=0;
+const el={
+ prog:document.getElementById("prog"), turn:document.getElementById("turn"), target:document.getElementById("target"),
+ pa:document.getElementById("pa"), pb:document.getElementById("pb"), ta:document.getElementById("ta"), tb:document.getElementById("tb"),
+ syllables:document.getElementById("syllables"), result:document.getElementById("result"), nextBtn:document.getElementById("nextBtn"),
+ inputrow:document.getElementById("inputrow"), inp:document.getElementById("inp")
+};
 const clean=s=>(s||"").replace(/[.,!?~…]/g,"").replace(/\s+/g," ").trim(), chars=s=>[...clean(s).replace(/\s/g,"")];
 function alignment(t,s){let a=chars(t),b=chars(s),d=Array.from({length:a.length+1},()=>Array(b.length+1).fill(0));for(let i=0;i<=a.length;i++)d[i][0]=i;for(let j=0;j<=b.length;j++)d[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));let i=a.length,j=b.length,r=[];while(i||j){if(i&&j&&d[i][j]===d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)){r.push({ok:a[i-1]===b[j-1]});i--;j--}else if(i&&d[i][j]===d[i-1][j]+1){r.push({ok:false});i--}else j--}return r.reverse()}
-function boxes(r){let e=syllables;e.innerHTML="";let k=0;for(let c of clean(turns[n].target)){if(c===" "){e.insertAdjacentHTML("beforeend",'<span class="gap"></span>');continue}let q=r?r[k++]:null;e.insertAdjacentHTML("beforeend",`<span class="syl ${q?(q.ok?"ok":"bad"):""}"><i>${q?(q.ok?"O":"X"):"·"}</i>${c}</span>`)}}
-function render(){let t=turns[n];prog.textContent=`${n+1} / ${turns.length}`;turn.textContent=t.name+" 차례";target.textContent=t.target;pa.className="person "+(t.speaker==="A"?"active":"dim");pb.className="person "+(t.speaker==="B"?"active":"dim");ta.textContent=t.speaker==="A"?"말하기 시작":"상대의 차례를 기다리세요.";tb.textContent=t.speaker==="B"?"말하기 시작":"상대의 차례를 기다리세요.";boxes();result.style.display="none";next.style.display="none";inputrow.style.display="none"}
+function boxes(r){let e=el.syllables;e.innerHTML="";let k=0;for(let c of clean(turns[n].target)){if(c===" "){e.insertAdjacentHTML("beforeend",'<span class="gap"></span>');continue}let q=r?r[k++]:null;e.insertAdjacentHTML("beforeend",`<span class="syl ${q?(q.ok?"ok":"bad"):""}"><i>${q?(q.ok?"O":"X"):"·"}</i>${c}</span>`)}}
+function render(){let t=turns[n];el.prog.textContent=`${n+1} / ${turns.length}`;el.turn.textContent=t.name+" 차례";el.target.textContent=t.target;el.pa.className="person "+(t.speaker==="A"?"active":"dim");el.pb.className="person "+(t.speaker==="B"?"active":"dim");el.ta.textContent=t.speaker==="A"?"말하기 시작":"상대의 차례를 기다리세요.";el.tb.textContent=t.speaker==="B"?"말하기 시작":"상대의 차례를 기다리세요.";boxes();el.result.style.display="none";el.nextBtn.style.display="none";el.inputrow.style.display="none"}
 function model(){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(turns[n].target);u.lang="ko-KR";u.rate=.82;speechSynthesis.speak(u)}
-function manual(){inputrow.style.display=inputrow.style.display==="flex"?"none":"flex"}
-function recognize(){let R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){alert("이 브라우저는 음성 인식을 지원하지 않습니다. 직접 입력을 이용해 주세요.");return}let r=new R();r.lang="ko-KR";r.onresult=e=>check(e.results[0][0].transcript);r.start()}
-function check(s){if(!s)return;let r=alignment(turns[n].target,s),score=Math.round(r.filter(x=>x.ok).length/r.length*100);boxes(r);result.style.display="block";result.textContent=`인식 문장: ${s} · ${score}점 — `+(score>=90?"아주 좋아요!":score>=70?"X 음절을 더 또박또박 말해 보세요.":"모범 문장을 듣고 다시 천천히 말해 보세요.");next.style.display="block"}
-function next(){if(n<turns.length-1){n++;render();scrollTo({top:0,behavior:"smooth"})}else{alert("5과 연습을 모두 마쳤어요!");location.href="index.html"}}render();</script></body></html>
+function manual(){el.inputrow.style.display=el.inputrow.style.display==="flex"?"none":"flex"}
+function recognize(){
+ let R=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!R){alert("이 브라우저에서는 음성 인식이 지원되지 않습니다. Chrome 또는 Samsung Internet에서 열거나 직접 입력을 이용해 주세요.");return}
+ try{
+  let r=new R(); r.lang="ko-KR"; r.continuous=false; r.interimResults=false; r.maxAlternatives=1;
+  el.result.style.display="block"; el.result.textContent="듣고 있어요. 문장을 천천히 말해 주세요.";
+  r.onresult=e=>{let said=e.results?.[0]?.[0]?.transcript||""; if(said) check(said); else {el.result.textContent="음성을 인식하지 못했어요. 다시 말해 보세요."}};
+  r.onerror=e=>{el.result.style.display="block"; el.result.textContent=e.error==="not-allowed"?"마이크 권한이 필요해요. 브라우저에서 마이크 사용을 허용한 뒤 다시 눌러 주세요.":"음성을 인식하지 못했어요. 다시 말해 보거나 직접 입력을 이용해 주세요."};
+  r.onnomatch=()=>{el.result.style.display="block";el.result.textContent="음성을 인식하지 못했어요. 다시 천천히 말해 보세요."};
+  r.start();
+ }catch(e){alert("음성 인식을 시작하지 못했어요. 페이지를 새로고침한 뒤 다시 시도해 주세요.")}
+}
+function check(s){if(!s)return;let r=alignment(turns[n].target,s),score=Math.round(r.filter(x=>x.ok).length/r.length*100);boxes(r);el.result.style.display="block";el.result.textContent=`인식 문장: ${s} · ${score}점 — `+(score>=90?"아주 좋아요!":score>=70?"X 음절을 더 또박또박 말해 보세요.":"모범 문장을 듣고 다시 천천히 말해 보세요.");el.nextBtn.style.display="block"}
+function nextTurn(){if(n<turns.length-1){n++;render();scrollTo({top:0,behavior:"smooth"})}else{alert("5과 연습을 모두 마쳤어요!");location.href="index.html"}}render();</script></body></html>
